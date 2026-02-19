@@ -14,4 +14,8 @@ public class Hrana {
         this.u = u;
         this.c = 1;
     }
+
+    public boolean jeIncidentna(Vrchol v) {
+        return this.u == v || this.v == v;
+    }
 }

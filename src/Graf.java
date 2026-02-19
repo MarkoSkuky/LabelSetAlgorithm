@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -7,6 +6,10 @@ import java.util.Scanner;
 public class Graf {
     public ArrayList<Vrchol> vrcholy;
     public ArrayList<Hrana> hrany;
+
+    int n; // pocet vrcholov grafu
+    int m; // pocet hran grafu
+    int H[][]; // pole udajov o hranach
 
     public Graf() {
         this.vrcholy = new ArrayList<>();
@@ -16,8 +19,24 @@ public class Graf {
     public Graf(int pocetVrcholov) {
         this.vrcholy = new ArrayList<>();
         this.hrany = new ArrayList<>();
+        this.n = pocetVrcholov;
+
         for (int i = 1; i <= pocetVrcholov; i++) {
             this.vrcholy.add(new Vrchol(i));
+        }
+    }
+
+    public Graf(int paPocetVrcholov, int paPocetHran) {
+        n = paPocetVrcholov;
+        m = paPocetHran;
+
+        H = new int[1 + m][3];
+
+        vrcholy = new ArrayList<>();
+        hrany = new ArrayList<>();
+
+        for (int i = 1; i <= n; i++) {
+            vrcholy.add(new Vrchol(i));
         }
     }
 
@@ -38,78 +57,47 @@ public class Graf {
         this.hrany.getLast().c = c;
     }
 
-
     /*
-     * To change this license header, choose License Headers in Project Properties.
-     * To change this template file, choose Tools | Templates
-     * and open the template in the editor.
-     */
-
-
-    int n; // pocet vrcholov grafu
-    int m; // pocet hran grafu
-    int H[][]; // pole udajov o hranach
-
-    public Graf(int paPocetVrcholov, int paPocetHran) {
-        n = paPocetVrcholov;
-        m = paPocetHran;
-        H = new int[1 + m][3];
-    }
-
-    /*
-    Nacitanie grafu zo suboru:
-    Na kazdom riadku su tri cisla, prve a druhe cislo su cisla vrcholov
-    a tretie cislo je ohodnotenie hrany.
-    Pocet vrcholov aj pocet hran sa urci automaticky. Pocet hran je rovny
-    poctu riadkov v subore a pocet vrcholov je rovny najvacsiemu cislu
-    vrcholu v udajoch o hranach.
+    Nacitanie grafu zo suboru
     */
     public static Graf nacitajSubor(String nazovSuboru)
         throws FileNotFoundException {
-        // otvorim subor a pripravim Scanner pre nacitavanie
+
         Scanner s = new Scanner(new FileInputStream(nazovSuboru));
 
-        // najskor len zistim pocet vrcholov a pocet hran
         int pocetVrcholov = 1;
         int pocetHran = 0;
-        // prejdem cely subor
-        while(s.hasNext()) {
-            // nacitam udaje o hrane
+
+        while (s.hasNext()) {
             int u = s.nextInt();
             int v = s.nextInt();
-            int c = s.nextInt();
+            s.nextInt(); // c
 
-            // nacital som hranu, zvysim ich pocet o 1
             pocetHran++;
 
-            // skontrolujem, ci netreba zvysit pocet vrcholov
             if (pocetVrcholov < u) pocetVrcholov = u;
             if (pocetVrcholov < v) pocetVrcholov = v;
         }
-        // ukoncim nacitavanie zo suboru
         s.close();
 
-        // vytvorim objekt grafu s potrebnym poctom vrcholo v aj hran
-        Graf g = new Graf(pocetVrcholov);
+        // TU bola chyba – teraz je to správne
+        Graf g = new Graf(pocetVrcholov, pocetHran);
 
-        // po druhy krat otvorim ten isty subor,
-        // uz pozanm pocet vrcholov aj hran a mam alokovanu pamat
         s = new Scanner(new FileInputStream(nazovSuboru));
 
-        // postune nacitam vsetky hrany
-        // tentokrat si ich uz budem aj ukladat do pamate
         for (int j = 1; j <= pocetHran; j++) {
             int u = s.nextInt();
             int v = s.nextInt();
             int c = s.nextInt();
 
-            g.pridajHranu(u, v ,c);
+            g.pridajHranu(u, v, c);
 
             g.H[j][0] = u;
             g.H[j][1] = v;
             g.H[j][2] = c;
         }
 
+        s.close();
         return g;
     }
 
@@ -118,6 +106,32 @@ public class Graf {
         System.out.println("Pocet hran: " + m);
     }
 
+    public int stupenVrchola(Vrchol v) {
+        int stupen = 0;
+        for (Hrana h : hrany) {
+            if (h.jeIncidentna(v)) {
+                stupen++;
+            }
+        }
+        return stupen;
+    }
+
+    public void printValencnuPostupnost() {
+        for (Vrchol v : vrcholy) {
+            System.out.print(stupenVrchola(v) + ", ");
+        }
+        System.out.println();
+    }
+
+    public void printSusedneHrany(Vrchol v) {
+        ArrayList<Hrana> incidentne = new ArrayList<>();
+        for (Hrana h : hrany) {
+            if (h.jeIncidentna(v)) {
+                incidentne.add(h);
+            }
+        }
+        for (Hrana hrana : incidentne) {
+            System.out.print("{" + hrana.u.cislo + ", " + hrana.v.cislo + "} ");
+        }
+    }
 }
-
-

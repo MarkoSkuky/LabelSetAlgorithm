@@ -1,5 +1,7 @@
+import java.io.FileNotFoundException;
+
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         {
 //            Graf g = new Graf(10);
 //            g.printInfo();
@@ -20,8 +22,10 @@ public class Main {
 //            g.pridajHranu(10, 6);
 //            g.pridajHranu(10, 8);
 
-            Graf g = Graf.nacitajSubor();
-
+            Graf g = Graf.nacitajSubor("src/graf.txt");
+//            g.printInfo();
+//            g.printValencnuPostupnost();
+            g.printSusedneHrany(g.vrcholy.get(1));
 
 
         }
