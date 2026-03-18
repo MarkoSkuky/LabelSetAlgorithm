@@ -2,33 +2,21 @@ import java.io.FileNotFoundException;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
-        {
-//            Graf g = new Graf(10);
-//            g.printInfo();
-//
-//            g.pridajHranu(1, 2);
-//            g.pridajHranu(1, 6);
-//            g.pridajHranu(2, 3);
-//            g.pridajHranu(2, 6);
-//            g.pridajHranu(2, 7);
-//            g.pridajHranu(3, 7);
-//            g.pridajHranu(3, 4);
-//            g.pridajHranu(7, 6);
-//            g.pridajHranu(7, 4);
-//            g.pridajHranu(4, 5);
-//            g.pridajHranu(5, 8);
-//            g.pridajHranu(5, 9);
-//            g.pridajHranu(8, 9);
-//            g.pridajHranu(10, 6);
-//            g.pridajHranu(10, 8);
+        DiGraf g = DiGraf.nacitajSubor("src/graf2.txt");
+        g.printInfo();
 
-            Graf g = Graf.nacitajSubor("src/graf.txt");
-//            g.printInfo();
-//            g.printValencnuPostupnost();
-            g.printSusedneHrany(g.vrcholy.get(1));
+        int startCislo = 5;
+        int cielCislo = 3;
 
+        Vrchol start = g.dajVrchol(startCislo);
+        Vrchol ciel = g.dajVrchol(cielCislo);
 
-        }
+//        LabelSet labelSet = new LabelSet(g);
+//        labelSet.najdiNajkratsieCesty(start);
+//        labelSet.najdiNajkratsiuCestuDo(start, ciel);
 
+        FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
+        floydAlgoritmus.najdiNajkratsieCesty();
+        floydAlgoritmus.vypisNajkratsiuCestu(startCislo, cielCislo);
     }
 }

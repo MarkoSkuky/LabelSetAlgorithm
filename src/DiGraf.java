@@ -3,22 +3,24 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class Graf {
+public class DiGraf {
+    public static final int NEKONECNO = 99999;
+
     public ArrayList<Vrchol> vrcholy;
-    public ArrayList<Hrana> hrany;
+    public ArrayList<OrHrana> orHrany;
 
-    int n; // pocet vrcholov grafu
-    int m; // pocet hran grafu
-    int H[][]; // pole udajov o hranach
+    int n;
+    int m;
+    int H[][];
 
-    public Graf() {
+    public DiGraf() {
         this.vrcholy = new ArrayList<>();
-        this.hrany = new ArrayList<>();
+        this.orHrany = new ArrayList<>();
     }
 
-    public Graf(int pocetVrcholov) {
+    public DiGraf(int pocetVrcholov) {
         this.vrcholy = new ArrayList<>();
-        this.hrany = new ArrayList<>();
+        this.orHrany = new ArrayList<>();
         this.n = pocetVrcholov;
 
         for (int i = 1; i <= pocetVrcholov; i++) {
@@ -26,17 +28,50 @@ public class Graf {
         }
     }
 
-    public Graf(int paPocetVrcholov, int paPocetHran) {
+    public DiGraf(int paPocetVrcholov, int paPocetHran) {
         n = paPocetVrcholov;
         m = paPocetHran;
 
         H = new int[1 + m][3];
 
         vrcholy = new ArrayList<>();
-        hrany = new ArrayList<>();
+        orHrany = new ArrayList<>();
 
         for (int i = 1; i <= n; i++) {
             vrcholy.add(new Vrchol(i));
+        }
+    }
+
+    public void zakladny(Vrchol u) {
+        for (Vrchol v : vrcholy) {
+            v.t = NEKONECNO;
+            v.x = null;
+        }
+        u.t = 0;
+
+        boolean urobitKolo = true;
+        while(urobitKolo) {
+            urobitKolo = false;
+            System.out.println("zacinam kolo");
+            for (OrHrana h : orHrany) {
+                Vrchol r = h.u;
+                Vrchol j = h.v;
+                int t_i = r.t;
+                int c_h = h.c_h;
+
+                System.out.println("kontrolujem orientovanu hranu " + h + " t(i) = " + t_i + " c(h) = " + c_h + " t(j) = " + j.t);
+                if (j.t > t_i + c_h) {
+                    j.t = t_i + c_h;
+                    j.x = r;
+                    urobitKolo = true;
+                    System.out.println("nasiel som zlepsenie, upravujem znacky: t(j) =" + j.t + " x(j) =" + j.x);
+                }
+            }
+        }
+
+        System.out.println("Vysledok");
+        for (Vrchol v : vrcholy) {
+            System.out.println("vrchol " + v +": " + v.t + "|" + v.x);
         }
     }
 
@@ -45,22 +80,20 @@ public class Graf {
     }
 
     public void pridajHranu(Vrchol u, Vrchol v) {
-        this.hrany.add(new Hrana(u, v));
+        this.orHrany.add(new OrHrana(u, v));
     }
 
     public void pridajHranu(int u, int v) {
         this.pridajHranu(dajVrchol(u), dajVrchol(v));
     }
 
-    public void pridajHranu(int u, int v, int c) {
+    public void pridajHranu(int u, int v, int c_h) {
         this.pridajHranu(dajVrchol(u), dajVrchol(v));
-        this.hrany.getLast().c = c;
+        this.orHrany.getLast().c_h = c_h;
     }
 
-    /*
-    Nacitanie grafu zo suboru
-    */
-    public static Graf nacitajSubor(String nazovSuboru)
+    
+    public static DiGraf nacitajSubor(String nazovSuboru)
         throws FileNotFoundException {
 
         Scanner s = new Scanner(new FileInputStream(nazovSuboru));
@@ -71,7 +104,7 @@ public class Graf {
         while (s.hasNext()) {
             int u = s.nextInt();
             int v = s.nextInt();
-            s.nextInt(); // c
+            s.nextInt();
 
             pocetHran++;
 
@@ -80,21 +113,20 @@ public class Graf {
         }
         s.close();
 
-        // TU bola chyba – teraz je to správne
-        Graf g = new Graf(pocetVrcholov, pocetHran);
+        DiGraf g = new DiGraf(pocetVrcholov, pocetHran);
 
         s = new Scanner(new FileInputStream(nazovSuboru));
 
         for (int j = 1; j <= pocetHran; j++) {
             int u = s.nextInt();
             int v = s.nextInt();
-            int c = s.nextInt();
+            int c_h = s.nextInt();
 
-            g.pridajHranu(u, v, c);
+            g.pridajHranu(u, v, c_h);
 
             g.H[j][0] = u;
             g.H[j][1] = v;
-            g.H[j][2] = c;
+            g.H[j][2] = c_h;
         }
 
         s.close();
@@ -108,7 +140,7 @@ public class Graf {
 
     public int stupenVrchola(Vrchol v) {
         int stupen = 0;
-        for (Hrana h : hrany) {
+        for (OrHrana h : orHrany) {
             if (h.jeIncidentna(v)) {
                 stupen++;
             }
@@ -124,13 +156,13 @@ public class Graf {
     }
 
     public void printSusedneHrany(Vrchol v) {
-        ArrayList<Hrana> incidentne = new ArrayList<>();
-        for (Hrana h : hrany) {
+        ArrayList<OrHrana> incidentne = new ArrayList<>();
+        for (OrHrana h : orHrany) {
             if (h.jeIncidentna(v)) {
                 incidentne.add(h);
             }
         }
-        for (Hrana hrana : incidentne) {
+        for (OrHrana hrana : incidentne) {
             System.out.print("{" + hrana.u.cislo + ", " + hrana.v.cislo + "} ");
         }
     }
