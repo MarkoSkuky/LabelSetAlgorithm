@@ -8,15 +8,14 @@ public class Main {
         int startCislo = 5;
         int cielCislo = 3;
 
-        Vrchol start = g.dajVrchol(startCislo);
-        Vrchol ciel = g.dajVrchol(cielCislo);
-
+//        Vrchol start = g.dajVrchol(startCislo);
+//        Vrchol ciel = g.dajVrchol(cielCislo);
+//
 //        LabelSet labelSet = new LabelSet(g);
 //        labelSet.najdiNajkratsieCesty(start);
-//        labelSet.najdiNajkratsiuCestuDo(start, ciel);
 
         FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
         floydAlgoritmus.najdiNajkratsieCesty();
-        floydAlgoritmus.vypisNajkratsiuCestu(startCislo, cielCislo);
+        floydAlgoritmus.vypisMaticuVzdialenosti();
     }
 }

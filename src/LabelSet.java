@@ -1,37 +1,43 @@
 import java.util.ArrayList;
 
 public class LabelSet {
+
     private final DiGraf graf;
-    private boolean vypocitane;
-    private Vrchol poslednyPociatocnyVrchol;
 
     public LabelSet(DiGraf graf) {
         this.graf = graf;
-        this.vypocitane = false;
-        this.poslednyPociatocnyVrchol = null;
     }
 
+    //metoda algoritmu
     public void najdiNajkratsieCesty(Vrchol pociatocnyVrchol) {
+
+        //vsetky znacky = nekonecno, start = 0
         inicializujZnacky(pociatocnyVrchol);
 
+        // Pole pre natrvalo označené vrcholy.
         boolean[] jeNatrvaloOznaceny = new boolean[graf.vrcholy.size() + 1];
         int krok = 1;
 
         while (true) {
             System.out.println();
+            // Epsilon = kandidáti (vrcholy s konečnou značkou, ktoré ešte nie sú natrvalo označené).
             System.out.println("KROK " + krok + ": epsilon = " + formatujEpsilon(jeNatrvaloOznaceny));
 
+            // Vyber riadiaci vrchol r s najmenšou dočasnou značkou t.
             Vrchol r = vyberRiadiciVrchol(jeNatrvaloOznaceny);
             if (r == null) {
+                // Ak v epsylone už nič nie je, algoritmus končí.
                 System.out.println("V epsylone uz nie su kandidati. Koniec.");
                 break;
             }
 
             System.out.println("r = " + r.cislo);
+            // Riadiaci vrchol natrvalo oznacime lebo lepsiu cestu donho uz nenajdeme
             jeNatrvaloOznaceny[r.cislo] = true;
 
             boolean maOdchadzajuceHrany = false;
             for (OrHrana h : graf.orHrany) {
+                // Filter: riešime len hrany, ktoré idú z riadiaceho vrcholu r.
                 if (h.u != r) {
                     continue;
                 }
@@ -39,18 +45,24 @@ public class LabelSet {
                 maOdchadzajuceHrany = true;
 
                 Vrchol j = h.v;
+                // t(i): cena do riadiaceho vrcholu r.
                 int t_i = r.t;
+                // c(h): cena hrany h.
                 int c_h = h.c_h;
+                // Kandidátna cena do vrcholu j cez riadiaci vrchol r.
                 int kandidat = t_i + c_h;
+                // Stará značka j pre výpis zmien.
                 int staraZnacka = j.t;
 
                 if (jeNatrvaloOznaceny[j.cislo]) {
+                    // Do natrvalo označeného vrcholu už nezasahujeme.
                     System.out.println(
                         "h=(" + h.u.cislo + "," + h.v.cislo + "), c(h)=" + c_h +
                         ", t(i)=" + formatujZnacku(t_i) +
                         " -> bez zmeny (vrchol " + j.cislo + " je uz natrvalo oznaceny)"
                     );
                 } else if (t_i != DiGraf.NEKONECNO && kandidat < j.t) {
+                    // nasla sa lepsia cesta do j
                     j.t = kandidat;
                     j.x = r;
                     System.out.println(
@@ -72,63 +84,40 @@ public class LabelSet {
                 }
             }
 
+            //ak z riadiaceho vrcholu nie je kam ist
             if (!maOdchadzajuceHrany) {
                 System.out.println("r nema ziadne odchadzajuce hrany.");
             }
 
             System.out.println("epsilon -> " + formatujEpsilon(jeNatrvaloOznaceny));
 
+            //pocitame kroky pre pekny vypis
             krok++;
         }
 
-        vypocitane = true;
-        poslednyPociatocnyVrchol = pociatocnyVrchol;
+        // Finálny výpis t(v)|x(v) po skončení algoritmu.
         vypisZnacky();
     }
 
-    public void najdiNajkratsieCesty(int pociatocnyVrcholCislo) {
-        najdiNajkratsieCesty(graf.dajVrchol(pociatocnyVrcholCislo));
-    }
-
-    public void najdiNajkratsiuCestuDo(Vrchol pociatocnyVrchol, Vrchol ciel) {
-        if (!vypocitane || poslednyPociatocnyVrchol != pociatocnyVrchol) {
-            najdiNajkratsieCesty(pociatocnyVrchol);
-        }
-        ArrayList<Vrchol> cesta = zostrojCestuDo(ciel);
-        if (cesta.isEmpty()) {
-            System.out.println("Do vrchola " + ciel.cislo + " neexistuje cesta.");
-            return;
-        }
-
-        System.out.print("Najkratsia cesta do vrchola " + ciel.cislo + " je: ");
-        for (int i = 0; i < cesta.size(); i++) {
-            System.out.print(cesta.get(i).cislo);
-            if (i < cesta.size() - 1) {
-                System.out.print(" -> ");
-            }
-        }
-        System.out.println(" | dlzka = " + ciel.t);
-    }
-
-    public void najdiNajkratsiuCestuDo(int pociatocnyVrcholCislo, int cielCislo) {
-        najdiNajkratsiuCestuDo(graf.dajVrchol(pociatocnyVrcholCislo), graf.dajVrchol(cielCislo));
-    }
-
+    // Nastaví počiatočné značky pred spustením algoritmu.
     private void inicializujZnacky(Vrchol pociatocnyVrchol) {
         for (Vrchol v : graf.vrcholy) {
             v.t = DiGraf.NEKONECNO;
             v.x = null;
         }
         pociatocnyVrchol.t = 0;
-        vypocitane = false;
-        poslednyPociatocnyVrchol = null;
     }
 
+    // Nájde kandidáta s najmenšou dočasnou značkou.
     private Vrchol vyberRiadiciVrchol(boolean[] jeNatrvaloOznaceny) {
+        //zatial null
         Vrchol r = null;
         int najlepsiaZnacka = DiGraf.NEKONECNO;
 
+
         for (Vrchol v : graf.vrcholy) {
+
+            //ak este nieje oznaceny a zaroven sa donho vieme dostat
             if (!jeNatrvaloOznaceny[v.cislo] && v.t < najlepsiaZnacka) {
                 najlepsiaZnacka = v.t;
                 r = v;
@@ -138,25 +127,28 @@ public class LabelSet {
         return r;
     }
 
+    // Naformátuje množinu epsilon do textu, napr. {2, 4, 7}.
     private String formatujEpsilon(boolean[] jeNatrvaloOznaceny) {
-        StringBuilder epsilon = new StringBuilder();
-        epsilon.append("{");
+        String epsilon = "{";
 
         boolean prvy = true;
+        //kazdy vrchol prejdeme
         for (Vrchol v : graf.vrcholy) {
+            //ak vrchol este nie je oznaceny a vieme sa donho dostat cize uz k nemu cesta nie je nekonecno:
             if (!jeNatrvaloOznaceny[v.cislo] && v.t != DiGraf.NEKONECNO) {
                 if (!prvy) {
-                    epsilon.append(", ");
+                    epsilon += ", ";
                 }
-                epsilon.append(v.cislo);
+                epsilon += v.cislo;
                 prvy = false;
             }
         }
-
-        epsilon.append("}");
-        return epsilon.toString();
+        epsilon += "}";
+        return epsilon;
     }
 
+    // Prevod internej značky na text: nekonečno -> INF, inak číslo.
+    //znacka je sucet cien hran po ktorych sme sa dostali k vrecholu
     private String formatujZnacku(int znacka) {
         if (znacka == DiGraf.NEKONECNO) {
             return "INF";
@@ -164,19 +156,7 @@ public class LabelSet {
         return Integer.toString(znacka);
     }
 
-    private ArrayList<Vrchol> zostrojCestuDo(Vrchol ciel) {
-        ArrayList<Vrchol> cesta = new ArrayList<>();
-        if (ciel.t == DiGraf.NEKONECNO) {
-            return cesta;
-        }
-
-        for (Vrchol v = ciel; v != null; v = v.x) {
-            cesta.add(0, v);
-        }
-
-        return cesta;
-    }
-
+    // Vypíše výsledné značky t(v)|x(v) pre všetky vrcholy.
     private void vypisZnacky() {
         System.out.println();
         System.out.println("Vysledne znacky t(v)|x(v):");
