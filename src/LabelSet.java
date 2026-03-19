@@ -14,30 +14,29 @@ public class LabelSet {
         //vsetky znacky = nekonecno, start = 0
         inicializujZnacky(pociatocnyVrchol);
 
-        // Pole pre natrvalo označené vrcholy.
-        boolean[] jeNatrvaloOznaceny = new boolean[graf.vrcholy.size() + 1];
+        // epsilony
+        ArrayList<Vrchol> epsilon = new ArrayList<>();
+        epsilon.add(pociatocnyVrchol);
+
+        // Mnozina natrvalo oznacenych vrcholov.
+        ArrayList<Vrchol> natrvaloOznacene = new ArrayList<>();
         int krok = 1;
 
-        while (true) {
+        while (!epsilon.isEmpty()) {
             System.out.println();
-            // Epsilon = kandidáti (vrcholy s konečnou značkou, ktoré ešte nie sú natrvalo označené).
-            System.out.println("KROK " + krok + ": epsilon = " + formatujEpsilon(jeNatrvaloOznaceny));
+            System.out.println("KROK " + krok + ": epsilon = " + formatujEpsilon(epsilon));
 
-            // Vyber riadiaci vrchol r s najmenšou dočasnou značkou t.
-            Vrchol r = vyberRiadiciVrchol(jeNatrvaloOznaceny);
-            if (r == null) {
-                // Ak v epsylone už nič nie je, algoritmus končí.
-                System.out.println("V epsylone uz nie su kandidati. Koniec.");
-                break;
-            }
+            // riadiaci podla epsilonu
+            Vrchol r = vyberRiadiciVrchol(epsilon);
 
             System.out.println("r = " + r.cislo);
-            // Riadiaci vrchol natrvalo oznacime lebo lepsiu cestu donho uz nenajdeme
-            jeNatrvaloOznaceny[r.cislo] = true;
+            // vyhodime z epsilonu, pridqme do oznacenych nech uz sa mnespustaju znova
+            epsilon.remove(r);
+            natrvaloOznacene.add(r);
 
             boolean maOdchadzajuceHrany = false;
             for (OrHrana h : graf.orHrany) {
-                // Filter: riešime len hrany, ktoré idú z riadiaceho vrcholu r.
+                // odfiltrujeme hrany ktore su incidentne s riadiacim v
                 if (h.u != r) {
                     continue;
                 }
@@ -45,16 +44,16 @@ public class LabelSet {
                 maOdchadzajuceHrany = true;
 
                 Vrchol j = h.v;
-                // t(i): cena do riadiaceho vrcholu r.
+                // cena do r
                 int t_i = r.t;
-                // c(h): cena hrany h.
+                // cena hrany h.
                 int c_h = h.c_h;
                 // Kandidátna cena do vrcholu j cez riadiaci vrchol r.
                 int kandidat = t_i + c_h;
-                // Stará značka j pre výpis zmien.
+                // stara znacka
                 int staraZnacka = j.t;
 
-                if (jeNatrvaloOznaceny[j.cislo]) {
+                if (natrvaloOznacene.contains(j)) {
                     // Do natrvalo označeného vrcholu už nezasahujeme.
                     System.out.println(
                         "h=(" + h.u.cislo + "," + h.v.cislo + "), c(h)=" + c_h +
@@ -65,6 +64,9 @@ public class LabelSet {
                     // nasla sa lepsia cesta do j
                     j.t = kandidat;
                     j.x = r;
+                    if (!epsilon.contains(j)) {
+                        epsilon.add(j);
+                    }
                     System.out.println(
                         "h=(" + h.u.cislo + "," + h.v.cislo + "), c(h)=" + c_h +
                         ", t(i)=" + formatujZnacku(t_i) +
@@ -89,36 +91,33 @@ public class LabelSet {
                 System.out.println("r nema ziadne odchadzajuce hrany.");
             }
 
-            System.out.println("epsilon -> " + formatujEpsilon(jeNatrvaloOznaceny));
+            System.out.println("epsilon -> " + formatujEpsilon(epsilon));
 
             //pocitame kroky pre pekny vypis
             krok++;
         }
 
-        // Finálny výpis t(v)|x(v) po skončení algoritmu.
+        System.out.println("V epsylone uz nie su kandidati. Koniec.");
+
+        //   výpis t(v)|x(v)
         vypisZnacky();
     }
 
-    // Nastaví počiatočné značky pred spustením algoritmu.
+    // nastavime znacky na zaciatku
     private void inicializujZnacky(Vrchol pociatocnyVrchol) {
         for (Vrchol v : graf.vrcholy) {
             v.t = DiGraf.NEKONECNO;
-            v.x = null;
         }
         pociatocnyVrchol.t = 0;
     }
 
-    // Nájde kandidáta s najmenšou dočasnou značkou.
-    private Vrchol vyberRiadiciVrchol(boolean[] jeNatrvaloOznaceny) {
-        //zatial null
-        Vrchol r = null;
+    // vyberieme z epsilonu r podla najmensej znacky
+    private Vrchol vyberRiadiciVrchol(ArrayList<Vrchol> epsilonVrcholy) {
+        Vrchol r = epsilonVrcholy.get(0);
         int najlepsiaZnacka = DiGraf.NEKONECNO;
 
-
-        for (Vrchol v : graf.vrcholy) {
-
-            //ak este nieje oznaceny a zaroven sa donho vieme dostat
-            if (!jeNatrvaloOznaceny[v.cislo] && v.t < najlepsiaZnacka) {
+        for (Vrchol v : epsilonVrcholy) {
+            if (v.t < najlepsiaZnacka) {
                 najlepsiaZnacka = v.t;
                 r = v;
             }
@@ -128,20 +127,17 @@ public class LabelSet {
     }
 
     // Naformátuje množinu epsilon do textu, napr. {2, 4, 7}.
-    private String formatujEpsilon(boolean[] jeNatrvaloOznaceny) {
+    // vyberieme cislo vrcholu v mnozine epsilonov
+    private String formatujEpsilon(ArrayList<Vrchol> epsilonVrcholy) {
         String epsilon = "{";
 
         boolean prvy = true;
-        //kazdy vrchol prejdeme
-        for (Vrchol v : graf.vrcholy) {
-            //ak vrchol este nie je oznaceny a vieme sa donho dostat cize uz k nemu cesta nie je nekonecno:
-            if (!jeNatrvaloOznaceny[v.cislo] && v.t != DiGraf.NEKONECNO) {
-                if (!prvy) {
-                    epsilon += ", ";
-                }
-                epsilon += v.cislo;
-                prvy = false;
+        for (Vrchol v : epsilonVrcholy) {
+            if (!prvy) {
+                epsilon += ", ";
             }
+            epsilon += v.cislo;
+            prvy = false;
         }
         epsilon += "}";
         return epsilon;

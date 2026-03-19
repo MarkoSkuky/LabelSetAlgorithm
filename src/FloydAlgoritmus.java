@@ -6,11 +6,10 @@ public class FloydAlgoritmus {
     // Počet vrcholov digrafu.
     private final int n;
 
-    // vzdialenosti[i][j] predstavuje aktuálnu dĺžku najkratšej známej cesty z vrchola i do vrchola j.
     private final int[][] vzdialenosti;
 
 
-    // Konštruktor pripraví matice a inicializuje ich podľa hrán digrafu.
+    // konstruktor
     public FloydAlgoritmus(DiGraf graf) {
         this.graf = graf;
         this.n = graf.vrcholy.size();
@@ -25,7 +24,7 @@ public class FloydAlgoritmus {
         inicializuj();
 
         // k je aktuálny medzivrchol.
-        for (int k = 1; k <= n; k++) {
+        for (int k = 1; k <= n; k++) { ///zelemy kriz z excelu
             for (int i = 1; i <= n; i++) { ///riadok
                 for (int j = 1; j <= n; j++) { ///stlpec
                     int kandidat = vzdialenosti[i][k] + vzdialenosti[k][j];

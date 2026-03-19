@@ -8,14 +8,14 @@ public class Main {
         int startCislo = 5;
         int cielCislo = 3;
 
-//        Vrchol start = g.dajVrchol(startCislo);
-//        Vrchol ciel = g.dajVrchol(cielCislo);
-//
-//        LabelSet labelSet = new LabelSet(g);
-//        labelSet.najdiNajkratsieCesty(start);
+        Vrchol start = g.dajVrchol(startCislo);
+        Vrchol ciel = g.dajVrchol(cielCislo);
 
-        FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
-        floydAlgoritmus.najdiNajkratsieCesty();
-        floydAlgoritmus.vypisMaticuVzdialenosti();
+        LabelSet labelSet = new LabelSet(g);
+        labelSet.najdiNajkratsieCesty(start);
+
+//        FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
+//        floydAlgoritmus.najdiNajkratsieCesty();
+//        floydAlgoritmus.vypisMaticuVzdialenosti();
     }
 }
