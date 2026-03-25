@@ -11,8 +11,13 @@ public class Main {
         Vrchol start = g.dajVrchol(startCislo);
         Vrchol ciel = g.dajVrchol(cielCislo);
 
-        LabelSet labelSet = new LabelSet(g);
-        labelSet.najdiNajkratsieCesty(start);
+//        LabelSet labelSet = new LabelSet(g);
+//        labelSet.najdiNajkratsieCesty(start);
+
+        KruskalovAlgoritmus kruskalovAlgoritmus = new KruskalovAlgoritmus(g);
+        kruskalovAlgoritmus.najlacnejsiaKostra();
+//        System.out.println();
+        kruskalovAlgoritmus.najdrahsiaKostra();
 
 //        FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
 //        floydAlgoritmus.najdiNajkratsieCesty();
