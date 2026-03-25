@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class KruskalovAlgoritmus {
+
     private final ArrayList<OrHrana> hrany;
     private final ArrayList<OrHrana> kostra;
     private final ArrayList<Vrchol> vrcholy;
@@ -12,19 +13,20 @@ public class KruskalovAlgoritmus {
         this.kostra = new ArrayList<>();
     }
 
-    public void najlacnejsiaKostra() {
-        this.hrany.sort(Comparator.comparingInt(a -> a.c_h));
-        nastavZnacku();
+    public void najdiNajlacnejsiuKostru() {
+        this.hrany.sort(Comparator.comparingInt(h -> h.c_h));
+        vyberHranyDoKostry();
     }
 
-    public void najdrahsiaKostra() {
-        this.hrany.sort(Comparator.comparingInt((OrHrana a) -> a.c_h).reversed());
-        nastavZnacku();
+    public void najdiNajdrahsiuKostru() {
+        this.hrany.sort(Comparator.comparingInt((OrHrana h) -> h.c_h).reversed());
+        vyberHranyDoKostry();
     }
 
-    private void nastavZnacku() {
+    private void vyberHranyDoKostry() {
         this.kostra.clear();
 
+        // pole k(v) = komponent vrchola
         int maxCislo = 0;
         for (Vrchol v : this.vrcholy) {
             if (v.cislo > maxCislo) {
@@ -32,34 +34,48 @@ public class KruskalovAlgoritmus {
             }
         }
 
-        int[] znacky = new int[maxCislo + 1];
+        int[] komponent = new int[maxCislo + 1];
+
+        // kazdy vrchol ma svoj komponent na zaciatku
         for (Vrchol v : this.vrcholy) {
-            znacky[v.cislo] = v.cislo;
+            komponent[v.cislo] = v.cislo;
         }
 
-        for (OrHrana h : this.hrany) {
-            int znackaU = znacky[h.u.cislo];
-            int znackaV = znacky[h.v.cislo];
+        // prechadzame vsetky hrany
+        for (OrHrana hrana : this.hrany) {
 
-            if (znackaU != znackaV) {
-                this.kostra.add(h);
-                int staraZnacka = znackaU;
-                int novaZnacka = znackaV;
+            int k_u = komponent[hrana.u.cislo];
+            int k_v = komponent[hrana.v.cislo];
 
+            // ak niesu rovnake pridame do kostry
+            if (k_u != k_v) {
+                this.kostra.add(hrana);
+
+                // aby sme mohli zmenit vacsiu na mensiu
+                int novaZnacka = Math.min(k_u, k_v);
+                int staraZnacka = Math.max(k_u, k_v);
+
+                // prepisanie vacsej znacky
                 for (Vrchol v : this.vrcholy) {
-                    if (znacky[v.cislo] == staraZnacka) {
-                        znacky[v.cislo] = novaZnacka;
+                    if (komponent[v.cislo] == staraZnacka) {
+                        komponent[v.cislo] = novaZnacka;
                     }
                 }
             }
         }
-
         vypis();
     }
 
+
+
+
+
+
+
     private void vypis() {
-        System.out.print("Vysledok : {");
+        System.out.print("kostra = {");
         System.out.print("{");
+
         for (int i = 0; i < this.vrcholy.size(); i++) {
             if (i == this.vrcholy.size() - 1) {
                 System.out.print(this.vrcholy.get(i).cislo);
@@ -67,22 +83,26 @@ public class KruskalovAlgoritmus {
                 System.out.print(this.vrcholy.get(i).cislo + ", ");
             }
         }
+
         System.out.print("}, ");
 
-        this.kostra.sort(Comparator.comparingInt(a -> a.u.cislo));
+        this.kostra.sort(Comparator.comparingInt(h -> h.u.cislo));
+
         for (int i = 0; i < this.kostra.size(); i++) {
+            OrHrana h = this.kostra.get(i);
+
             if (i == this.kostra.size() - 1) {
-                System.out.print("{" + this.kostra.get(i).u.cislo + "," + this.kostra.get(i).v.cislo + "}}");
+                System.out.print("{" + h.u.cislo + "," + h.v.cislo + "}}");
             } else {
-                System.out.print("{" + this.kostra.get(i).u.cislo + "," + this.kostra.get(i).v.cislo + "}, ");
+                System.out.print("{" + h.u.cislo + "," + h.v.cislo + "}, ");
             }
         }
 
         int cena = 0;
-        for (int i = 0; i < this.kostra.size(); i++) {
-            cena += this.kostra.get(i).c_h;
+        for (OrHrana h : this.kostra) {
+            cena += h.c_h;
         }
 
-        System.out.printf("\nCena : %d", cena);
+        System.out.printf("\ncena kostry = %d", cena);
     }
 }

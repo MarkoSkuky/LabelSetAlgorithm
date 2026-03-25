@@ -15,9 +15,9 @@ public class Main {
 //        labelSet.najdiNajkratsieCesty(start);
 
         KruskalovAlgoritmus kruskalovAlgoritmus = new KruskalovAlgoritmus(g);
-        kruskalovAlgoritmus.najlacnejsiaKostra();
+        kruskalovAlgoritmus.najdiNajlacnejsiuKostru();
 //        System.out.println();
-        kruskalovAlgoritmus.najdrahsiaKostra();
+        kruskalovAlgoritmus.najdiNajdrahsiuKostru();
 
 //        FloydAlgoritmus floydAlgoritmus = new FloydAlgoritmus(g);
 //        floydAlgoritmus.najdiNajkratsieCesty();
